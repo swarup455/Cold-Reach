@@ -14,3 +14,5 @@ This project is currently under development. Features are being added and things
 
 - Frontend: React, TypeScript, Redux Toolkit, Tailwind CSS
 - Backend: Node.js, Express, TypeScript, MongoDB, Redis
+
+-Live Url: https://cold-reach-ten.vercel.app/
