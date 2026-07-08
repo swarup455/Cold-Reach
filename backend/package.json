@@ -12,7 +12,6 @@
   "author": "",
   "license": "ISC",
   "type": "module",
-  {
   "dependencies": {
     "@types/node": "^26.1.0",
     "@upstash/redis": "^1.38.0",
