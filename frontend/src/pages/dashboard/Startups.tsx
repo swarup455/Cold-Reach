@@ -1,26 +1,28 @@
 import { useState } from "react";
 import { Search, Inbox, AlertCircle, RefreshCw } from "lucide-react";
 import { useCompanies } from "@/hooks/useCompanies";
+import { FilterBar } from "@/components/company/FilterBar";
+import { useFilterParams } from "@/hooks/useFilterParams";
 import { CompanyCard, CompanyCardSkeleton } from "@/components/company/CompanyCard";
 import type { Company } from "@/api/companyApi";
-
-const STATUS_FILTERS: { label: string; value: string | undefined }[] = [
-    { label: "All", value: undefined },
-    { label: "Added", value: "added" },
-    { label: "Enriched", value: "enriched" },
-    { label: "Draft ready", value: "draft-ready" },
-    { label: "Sent", value: "sent" },
-];
 
 const Startups = () => {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<string | undefined>(undefined);
     const [page, setPage] = useState(1);
+    const { filters, activeCount } = useFilterParams();
 
     const { companies, pagination, loading, error, refetch } = useCompanies({
         search: search || undefined,
         page,
         limit: 90,
+        hiring: filters.hiring,
+        batch: filters.batch,
+        industry: filters.industry,
+        teamSize: filters.teamSize,
+        location: filters.location,
+        tags: filters.tags,
+        sort: filters.sort,
     });
 
     const handleCompanyClick = (company: Company) => {
@@ -56,22 +58,8 @@ const Startups = () => {
             </div>
 
             {/* Status filter tabs */}
-            <div className="mb-6 flex flex-wrap gap-2">
-                {STATUS_FILTERS.map((f) => (
-                    <button
-                        key={f.label}
-                        onClick={() => {
-                            setStatus(f.value);
-                            setPage(1);
-                        }}
-                        className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${status === f.value
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                            }`}
-                    >
-                        {f.label}
-                    </button>
-                ))}
+            <div className="mb-6">
+                <FilterBar />
             </div>
 
             {/* Error state */}

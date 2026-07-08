@@ -13,6 +13,12 @@ export interface Company {
     isHiring: boolean;
     tags: string[];
     teamSize?: number;
+    status?: string;
+    industry?: string;
+    stage?: string;
+    location?: string;
+    launchedAt?: string;
+    ycUrl?: string;
     lastSyncedAt: string;
 }
 
@@ -24,17 +30,24 @@ export interface Pagination {
 }
 
 export interface GetCompaniesParams {
-    batch?: string;
-    isHiring?: boolean;
-    tag?: string;
     search?: string;
     page?: number;
     limit?: number;
+    hiring?: "yes" | "no";
+    batch?: string;
+    industry?: string[];
+    teamSize?: string;
+    location?: string;
+    tags?: string[];
+    sort?: string;
 }
 
 export const getCompanies = async (params: GetCompaniesParams = {}) => {
     const res = await api.get("/companies", { params });
-    return res.data.data as { companies: Company[]; pagination: Pagination };
+    return res.data.data as {
+        companies: Company[];
+        pagination: Pagination;
+    };
 };
 
 export const getCompanyById = async (id: string) => {
