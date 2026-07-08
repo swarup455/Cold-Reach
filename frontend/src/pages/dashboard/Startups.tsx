@@ -8,9 +8,8 @@ import type { Company } from "@/api/companyApi";
 
 const Startups = () => {
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState<string | undefined>(undefined);
     const [page, setPage] = useState(1);
-    const { filters, activeCount } = useFilterParams();
+    const { filters } = useFilterParams();
 
     const { companies, pagination, loading, error, refetch } = useCompanies({
         search: search || undefined,
@@ -96,9 +95,10 @@ const Startups = () => {
                         No companies yet
                     </p>
                     <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
-                        {search || status
-                            ? "Nothing matches your current filters. Try clearing them."
-                            : "Fetch companies from Y Combinator or add one manually to get started."}
+                        {search || Object.keys(filters).some((key) => {
+                            const value = filters[key as keyof typeof filters];
+                            return Array.isArray(value) ? value.length > 0 : value !== undefined;
+                        })}
                     </p>
                 </div>
             )}
