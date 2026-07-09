@@ -161,7 +161,7 @@ ${isActive(href)
             )}
 
             <aside
-                className={`fixed left-0 top-0 z-50 h-full w-68 transform border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-950 md:hidden
+                className={`fixed left-0 top-0 z-50 h-screen w-68 transform border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-950 md:hidden
 ${open ? "translate-x-0" : "-translate-x-full"}
 `}
             >
