@@ -19,12 +19,21 @@ interface LoadingState {
     fetchCurrentUser: boolean;
 }
 
+interface ErrorState {
+    register: string | null;
+    verifyOTP: string | null;
+    resendOTP: string | null;
+    login: string | null;
+    logout: string | null;
+    fetchCurrentUser: string | null;
+}
+
 interface AuthState {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
     loading: LoadingState;
-    error: string | null;
+    error: ErrorState;
 }
 
 const initialState: AuthState = {
@@ -39,7 +48,14 @@ const initialState: AuthState = {
         logout: false,
         fetchCurrentUser: false,
     },
-    error: null,
+    error: {
+        register: null,
+        verifyOTP: null,
+        resendOTP: null,
+        login: null,
+        logout: null,
+        fetchCurrentUser: null,
+    },
 };
 
 // ---- thunks ----
@@ -124,8 +140,11 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        clearError: (state) => {
-            state.error = null;
+        clearError: (
+            state,
+            action: PayloadAction<keyof ErrorState>
+        ) => {
+            state.error[action.payload] = null;
         },
         setUser: (state, action: PayloadAction<User>) => {
             state.user = action.payload;
@@ -137,7 +156,7 @@ const authSlice = createSlice({
             // register
             .addCase(registerUser.pending, (state) => {
                 state.loading.register = true;
-                state.error = null;
+                state.error.register = null;
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading.register = false;
@@ -145,13 +164,13 @@ const authSlice = createSlice({
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading.register = false;
-                state.error = action.payload as string;
+                state.error.register = action.payload as string;
             })
 
             // verify otp
             .addCase(verifyOTP.pending, (state) => {
                 state.loading.verifyOTP = true;
-                state.error = null;
+                state.error.verifyOTP = null;
             })
             .addCase(verifyOTP.fulfilled, (state, action) => {
                 state.loading.verifyOTP = false;
@@ -159,26 +178,26 @@ const authSlice = createSlice({
             })
             .addCase(verifyOTP.rejected, (state, action) => {
                 state.loading.verifyOTP = false;
-                state.error = action.payload as string;
+                state.error.verifyOTP = action.payload as string;
             })
 
             // resend otp
             .addCase(resendOTP.pending, (state) => {
                 state.loading.resendOTP = true;
-                state.error = null;
+                state.error.resendOTP = null;
             })
             .addCase(resendOTP.fulfilled, (state) => {
                 state.loading.resendOTP = false;
             })
             .addCase(resendOTP.rejected, (state, action) => {
                 state.loading.resendOTP = false;
-                state.error = action.payload as string;
+                state.error.resendOTP = action.payload as string;
             })
 
             // login
             .addCase(loginUser.pending, (state) => {
                 state.loading.login = true;
-                state.error = null;
+                state.error.login = null;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading.login = false;
@@ -189,7 +208,7 @@ const authSlice = createSlice({
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading.login = false;
-                state.error = action.payload as string;
+                state.error.login = action.payload as string;
             })
 
             // logout
@@ -205,7 +224,7 @@ const authSlice = createSlice({
             })
             .addCase(logoutUser.rejected, (state, action) => {
                 state.loading.logout = false;
-                state.error = action.payload as string;
+                state.error.logout = action.payload as string;
             })
 
             // fetch current user
@@ -219,7 +238,7 @@ const authSlice = createSlice({
             })
             .addCase(fetchCurrentUser.rejected, (state, action) => {
                 state.loading.fetchCurrentUser = false;
-                state.error = action.payload as string;
+                state.error.fetchCurrentUser = action.payload as string;
                 state.isAuthenticated = false;
             });
     },

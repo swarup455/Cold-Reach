@@ -1,50 +1,82 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { RegisterForm, type RegisterFormValues } from "@/components/auth/registerForm";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { registerUser, verifyOTP, clearError } from "@/features/auth/authSlice";
 import type { RootState } from "@/app/store";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const { loading, error } = useAppSelector((state: RootState) => state.auth);
 
-    // userId isn't part of persisted auth state (user isn't verified/logged in yet),
-    // so it's tracked locally between the "send otp" and "verify otp" steps.
+    // user isn't logged in yet, so keep the pending id locally
     const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
     const handleSendOtp = async (values: RegisterFormValues) => {
-        const result = await dispatch(
-            registerUser({ name: values.fullName, email: values.email, password: values.password })
-        );
+        try {
+            const user = await dispatch(
+                registerUser({
+                    name: values.fullName,
+                    email: values.email,
+                    password: values.password,
+                })
+            ).unwrap();
 
-        if (registerUser.fulfilled.match(result)) {
-            setPendingUserId(result.payload._id);
-        } else {
-            // rejected — throw so RegisterForm's try/catch shows its local error state
-            throw new Error((result.payload as string) || "Registration failed");
+            setPendingUserId(user._id);
+        } catch {
+            // handled by useEffect
         }
     };
 
     const handleVerifyOtp = async (_email: string, otp: string): Promise<boolean> => {
         if (!pendingUserId) return false;
 
-        const result = await dispatch(verifyOTP({ userId: pendingUserId, otp }));
-        return verifyOTP.fulfilled.match(result);
+        try {
+            await dispatch(
+                verifyOTP({
+                    userId: pendingUserId,
+                    otp,
+                })
+            ).unwrap();
+
+            return true;
+        } catch {
+            return false;
+        }
     };
 
     const handleRegistrationComplete = () => {
-        // account created + verified — send them to log in (or straight to dashboard,
-        // if you'd rather auto-login here since verifyOTP already confirms identity)
         navigate("/login");
     };
 
     const handleSwitchToLogin = () => {
-        dispatch(clearError());
+        dispatch(clearError("register"));
         navigate("/login");
     };
+
+    useEffect(() => {
+        if (error.register) {
+            toast.error(error.register);
+            dispatch(clearError("register"));
+        }
+    }, [error.register, dispatch]);
+
+    useEffect(() => {
+        if (error.verifyOTP) {
+            toast.error(error.verifyOTP);
+            dispatch(clearError("verifyOTP"));
+        }
+    }, [error.verifyOTP, dispatch]);
+
+    useEffect(() => {
+        if (error.resendOTP) {
+            toast.error(error.resendOTP);
+            dispatch(clearError("resendOTP"));
+        }
+    }, [error.resendOTP, dispatch]);
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
@@ -63,7 +95,7 @@ const RegisterPage = () => {
                         onSubmit={handleRegistrationComplete}
                         onSwitchToLogin={handleSwitchToLogin}
                         isLoading={loading.register}
-                        errorMessage={error}
+                        errorMessage={error.register}
                     />
                 </div>
             </div>

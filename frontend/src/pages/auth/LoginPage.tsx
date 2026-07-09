@@ -4,6 +4,8 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { loginUser, clearError } from "@/features/auth/authSlice";
 import type { RootState } from "@/app/store";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -18,8 +20,16 @@ const LoginPage = () => {
         }
     };
 
+    useEffect(() => {
+        if (error.login) {
+            console.log(error.login);
+            toast.error(error.login);
+            dispatch(clearError("login"));
+        }
+    }, [error.login, dispatch]);
+
     const handleSwitchToRegister = () => {
-        dispatch(clearError());
+        dispatch(clearError("register"));
         navigate("/register");
     };
 
@@ -38,7 +48,7 @@ const LoginPage = () => {
                         onSubmit={handleLogin}
                         onSwitchToRegister={handleSwitchToRegister}
                         isLoading={loading.login}
-                        errorMessage={error}
+                        errorMessage={error.login}
                     />
                 </div>
             </div>

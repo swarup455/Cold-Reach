@@ -13,7 +13,6 @@ export function CompanyCard({ company, onClick }: CompanyCardProps) {
         .slice(0, 2)
         .join("")
         .toUpperCase();
-        console.log(company)
 
     return (
         <div
