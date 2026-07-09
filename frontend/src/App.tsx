@@ -10,6 +10,9 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux"
 import { fetchCurrentUser } from "./features/auth/authSlice"
 import { useEffect } from "react"
 import Startups from "./pages/dashboard/Startups"
+import Templates from "./pages/dashboard/Templates"
+import SendEmail from "./pages/dashboard/SendEmail"
+import Profile from "./pages/dashboard/Profile"
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -40,6 +43,9 @@ const App = () => {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Navigate to="startups" replace />} />
           <Route path="startups" element={<Startups />} />
+          <Route path="templates" element={<Templates />} />
+          <Route path="send-mail" element={<SendEmail />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </div>
