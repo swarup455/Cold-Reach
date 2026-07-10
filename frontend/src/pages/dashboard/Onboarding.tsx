@@ -8,12 +8,8 @@ import {
 import { useAppSelector } from "@/hooks/redux";
 import type { RootState } from "@/app/store";
 
-// TODO: replace this mock request with your real API call / redux thunk,
-// e.g. `dispatch(updateProfile(values))` from a `features/profile/profileSlice`.
 async function submitProfileDetails(values: ProfileDetailsValues): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 800));
-    // Simulated success — swap this out for a real request:
-    // const res = await api.patch("/users/me", values);
     console.log("Submitting profile details:", values);
 }
 
@@ -21,15 +17,12 @@ const OnboardingPage = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // TODO: point this at your actual auth slice shape.
     const { user } = useAppSelector((state: RootState) => state.auth);
 
     const [isGoogleConnected, setIsGoogleConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // If your backend redirects back here with ?google=connected after the
-    // OAuth flow completes, pick that up and reflect it in local state.
     useEffect(() => {
         if (searchParams.get("google") === "connected") {
             setIsGoogleConnected(true);
@@ -40,20 +33,23 @@ const OnboardingPage = () => {
     }, [searchParams, setSearchParams]);
 
     const handleConnectGoogle = () => {
-        // TODO: point this at your real Google OAuth start endpoint.
         window.location.href = `/api/auth/google?redirect=/onboarding`;
     };
 
     const handleSubmit = async (values: ProfileDetailsValues) => {
         setErrorMessage(null);
         setIsLoading(true);
+
         try {
             await submitProfileDetails(values);
             toast.success("Profile saved");
             navigate("/dashboard");
         } catch (err) {
             const message =
-                err instanceof Error ? err.message : "Something went wrong. Please try again.";
+                err instanceof Error
+                    ? err.message
+                    : "Something went wrong. Please try again.";
+
             setErrorMessage(message);
             toast.error(message);
         } finally {
@@ -68,6 +64,7 @@ const OnboardingPage = () => {
                     <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
                         Complete your profile
                     </h1>
+
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                         Tell us more about yourself so we can personalize your experience
                     </p>

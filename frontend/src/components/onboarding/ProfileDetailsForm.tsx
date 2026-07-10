@@ -267,55 +267,61 @@ export interface ProfileDetailsProps {
 }
 
 const STEPS = [
-    { key: "google", label: "Google" },
-    { key: "basic", label: "Basic Info" },
-    { key: "education", label: "Education" },
-    { key: "experience", label: "Experience" },
-    { key: "skills", label: "Skills" },
-    { key: "projects", label: "Projects" },
-    { key: "certifications", label: "Certifications" },
-    { key: "jobPreferences", label: "Preferences" },
-    { key: "links", label: "Links" },
-] as const;
+    { key: "google", label: "Google", mobileLabel: "Google" },
+    { key: "basic", label: "Basic Info", mobileLabel: "Basic" },
+    { key: "education", label: "Education", mobileLabel: "Edu" },
+    { key: "experience", label: "Experience", mobileLabel: "Exp" },
+    { key: "skills", label: "Skills", mobileLabel: "Skills" },
+    { key: "projects", label: "Projects", mobileLabel: "Projects" },
+    { key: "certifications", label: "Certifications", mobileLabel: "Certs" },
+    { key: "jobPreferences", label: "Preferences", mobileLabel: "Prefs" },
+    { key: "links", label: "Links", mobileLabel: "Links" },
+];
 
 function StepTracker({ currentStep }: { currentStep: number }) {
     return (
-        <div className="mb-8">
-            <div className="flex items-center">
+        <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex min-w-max items-start px-1">
                 {STEPS.map((step, index) => {
                     const isCompleted = index < currentStep;
                     const isActive = index === currentStep;
+
                     return (
-                        <div key={step.key} className="flex flex-1 items-center last:flex-none">
-                            <div
-                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium ${isCompleted
-                                        ? "bg-blue-600 text-white"
-                                        : isActive
-                                            ? "border-2 border-blue-600 text-blue-600 dark:text-blue-400"
-                                            : "border border-slate-300 text-slate-400 dark:border-slate-700 dark:text-slate-500"
-                                    }`}
-                            >
-                                {isCompleted ? "✓" : index + 1}
+                        <div key={step.key} className="flex items-start">
+                            <div className="flex w-9 shrink-0 flex-col items-center sm:w-12">
+                                <div
+                                    className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors sm:h-9 sm:w-9 sm:text-sm ${isCompleted
+                                            ? "bg-blue-600 text-white"
+                                            : isActive
+                                                ? "border-2 border-blue-600 text-blue-600 dark:text-blue-400"
+                                                : "border border-slate-300 text-slate-400 dark:border-slate-700 dark:text-slate-500"
+                                        }`}
+                                >
+                                    {isCompleted ? "✓" : index + 1}
+                                </div>
+
+                                <span
+                                    className={`mt-1 text-center text-[10px] leading-tight sm:text-[11px] ${isActive
+                                            ? "font-semibold text-blue-600 dark:text-blue-400"
+                                            : "text-slate-500 dark:text-slate-400"
+                                        }`}
+                                >
+                                    <span className="sm:hidden">{step.mobileLabel}</span>
+                                    <span className="hidden sm:inline">{step.label}</span>
+                                </span>
                             </div>
+
                             {index < STEPS.length - 1 && (
                                 <div
-                                    className={`mx-2 h-0.5 flex-1 ${isCompleted ? "bg-blue-600" : "bg-slate-200 dark:bg-slate-800"
+                                    className={`mt-4 mx-1.5 h-0.5 w-6 shrink-0 sm:mx-2 sm:w-10 ${isCompleted
+                                            ? "bg-blue-600"
+                                            : "bg-slate-200 dark:bg-slate-800"
                                         }`}
                                 />
                             )}
                         </div>
                     );
                 })}
-            </div>
-            <div className="mt-1.5 hidden sm:flex">
-                {STEPS.map((step) => (
-                    <span
-                        key={step.key}
-                        className="flex-1 text-center text-[11px] text-slate-500 dark:text-slate-400"
-                    >
-                        {step.label}
-                    </span>
-                ))}
             </div>
         </div>
     );
