@@ -1,7 +1,7 @@
 // components/profile/steps/GoogleConnectStep.tsx
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Globe } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { ProfileDetailsInput } from "./ProfileDetailsForm";
 
 function FieldError({ message }: { message?: string }) {
