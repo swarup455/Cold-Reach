@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import bcrypt from "bcrypt";
-import jwt, {type SignOptions } from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 
 interface IEducation {
     level: string;
@@ -49,6 +49,7 @@ export interface IUser extends Document {
     email: string;
     password: string;
     isVerified: boolean;
+    isProfileComplete: boolean;
 
     profilePhoto?: string;
     phoneNumber?: string;
@@ -162,7 +163,8 @@ const userSchema: Schema<IUser> = new Schema(
             type: String,
             required: [true, "Password is required"],
         },
-        isVerified: {type: Boolean},
+        isVerified: { type: Boolean },
+        isProfileComplete: { type: Boolean, default: false },
         profilePhoto: { type: String },
         phoneNumber: { type: String },
         location: {
@@ -200,7 +202,7 @@ userSchema.pre<IUser>(
     "save",
     async function () {
         if (!this.isModified("password"))
-        this.password = await bcrypt.hash(this.password, 10);
+            this.password = await bcrypt.hash(this.password, 10);
     }
 );
 

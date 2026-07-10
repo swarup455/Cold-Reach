@@ -13,6 +13,8 @@ import Startups from "./pages/dashboard/Startups"
 import Templates from "./pages/dashboard/Templates"
 import SendEmail from "./pages/dashboard/SendEmail"
 import Profile from "./pages/dashboard/Profile"
+import RequireProfile from "./components/common/RequireProfile"
+import OnboardingPage from "./pages/dashboard/Onboarding"
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -40,12 +42,15 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Route>
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="startups" replace />} />
-          <Route path="startups" element={<Startups />} />
-          <Route path="templates" element={<Templates />} />
-          <Route path="send-mail" element={<SendEmail />} />
-          <Route path="profile" element={<Profile />} />
+        <Route element={<RequireProfile />}>
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="startups" replace />} />
+            <Route path="startups" element={<Startups />} />
+            <Route path="templates" element={<Templates />} />
+            <Route path="send-mail" element={<SendEmail />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
         </Route>
       </Routes>
     </div>
