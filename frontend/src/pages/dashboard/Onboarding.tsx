@@ -48,7 +48,12 @@ const OnboardingPage = () => {
 
         try {
             const updatedUser = await updateProfile(values);
-            dispatch(setUser({...updatedUser, isVerrified: user?.isVerified})); // or whatever your auth slice's action is called
+            dispatch(
+                setUser({
+                    ...updatedUser,
+                    isVerified: user?.isVerified ?? false,
+                })
+            );
             toast.success("Profile saved");
             navigate("/dashboard");
         } catch (err: any) {
