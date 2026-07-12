@@ -10,6 +10,7 @@ import {
     deleteAccount,
 } from "../controllers/authController.js";
 import { verifyJWT } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/multerMiddleware.js";
 
 const router = Router();
 
@@ -20,7 +21,15 @@ router.post("/login", loginUser);
 router.post("/logout", verifyJWT, logoutUser);
 
 router.get("/me", verifyJWT, getCurrentUser);
-router.patch("/update-profile", verifyJWT, updateProfile);
+router.patch(
+    "/update-profile",
+    verifyJWT,
+    upload.fields([
+        { name: "profilePhoto", maxCount: 1 },
+        { name: "resume", maxCount: 1 },
+    ]),
+    updateProfile
+);
 router.delete("/delete-account", verifyJWT, deleteAccount);
 
 export default router;

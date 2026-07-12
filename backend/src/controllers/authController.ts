@@ -5,12 +5,36 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendOTPEmail } from "../utils/mailer.js";
+import { uploadBufferToCloudinary } from "../config/cloudinary.js";
 
 const OTP_EXPIRY_SECONDS = 180;
 
 const generateOTP = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
+
+const JSON_FIELDS = [
+    "location",
+    "education",
+    "experience",
+    "skills",
+    "projects",
+    "certifications",
+    "jobPreferences",
+    "preferredLocations",
+];
+
+const PLAIN_FIELDS = [
+    "phoneNumber",
+    "dateOfBirth",
+    "headline",
+    "bio",
+    "yearsOfExperience",
+    "employmentStatus",
+    "linkedin",
+    "github",
+    "portfolio",
+];
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
@@ -147,50 +171,72 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
         .json(new ApiResponse(200, {}, "Logged out successfully"));
 });
 
+function parseField(key: string, value: unknown) {
+    if (!JSON_FIELDS.includes(key)) return value;
+
+    if (typeof value !== "string") return value;
+
+    try {
+        return JSON.parse(value);
+    } catch {
+        throw new ApiError(400, `Invalid JSON provided for field: ${key}`);
+    }
+}
+
 const updateProfile = asyncHandler(async (req: Request, res: Response) => {
-    const userId = (req as any).user?._id; // set by auth middleware
+    const userId = (req as any).user?._id;
 
     if (!userId) {
         throw new ApiError(401, "Unauthorized");
     }
 
-    const allowedFields = [
-        "name",
-        "profilePhoto",
-        "phoneNumber",
-        "location",
-        "dateOfBirth",
-        "headline",
-        "bio",
-        "yearsOfExperience",
-        "employmentStatus",
-        "education",
-        "experience",
-        "skills",
-        "projects",
-        "certifications",
-        "linkedin",
-        "github",
-        "portfolio",
-        "resumeUrl",
-        "jobPreferences",
-    ];
+    const files = req.files as
+        | { [fieldname: string]: Express.Multer.File[] }
+        | undefined;
 
     const updates: Record<string, unknown> = {};
-    for (const field of allowedFields) {
+
+    for (const field of PLAIN_FIELDS) {
         if (req.body[field] !== undefined) {
             updates[field] = req.body[field];
         }
+    }
+
+    for (const field of JSON_FIELDS) {
+        if (req.body[field] !== undefined) {
+            updates[field] = parseField(field, req.body[field]);
+        }
+    }
+
+    const profilePhotoFile = files?.profilePhoto?.[0];
+    if (profilePhotoFile) {
+        const result = await uploadBufferToCloudinary(
+            profilePhotoFile.buffer,
+            "profile-photos"
+        );
+        updates.profilePhoto = result.secure_url;
+    } else if (req.body.profilePhoto !== undefined) {
+        updates.profilePhoto = req.body.profilePhoto;
+    }
+
+    const resumeFile = files?.resume?.[0];
+    if (resumeFile) {
+        const result = await uploadBufferToCloudinary(resumeFile.buffer, "resumes");
+        updates.resumeUrl = result.secure_url;
+    } else if (req.body.resumeUrl !== undefined) {
+        updates.resumeUrl = req.body.resumeUrl;
     }
 
     if (Object.keys(updates).length === 0) {
         throw new ApiError(400, "No valid fields provided to update");
     }
 
+    updates.isProfileComplete = true;
+
     const updatedUser = await User.findByIdAndUpdate(
         userId,
         { $set: updates },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true, context: "query" }
     ).select("-password");
 
     if (!updatedUser) {

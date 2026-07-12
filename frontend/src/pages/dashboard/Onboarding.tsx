@@ -1,39 +1,45 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-    ProfileDetails,
-    type ProfileDetailsValues,
-} from "@/components/onboarding/ProfileDetailsForm";
-import { useAppSelector } from "@/hooks/redux";
+import { ProfileDetails } from "@/components/onboarding/ProfileDetailsForm";
+import type { ProfileDetailsValues } from "@/components/onboarding/profileSchema";
+import { updateProfile } from "@/api/profileApi";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import type { RootState } from "@/app/store";
-
-async function submitProfileDetails(values: ProfileDetailsValues): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log("Submitting profile details:", values);
-}
+import { useGoogle } from "@/hooks/useGoogle";
+import { setUser } from "@/features/auth/authSlice";
 
 const OnboardingPage = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const { user } = useAppSelector((state: RootState) => state.auth);
 
-    const [isGoogleConnected, setIsGoogleConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const {
+        gmailConnected,
+        loading: googleLoading,
+        connect,
+        refetch,
+    } = useGoogle();
 
     useEffect(() => {
-        if (searchParams.get("google") === "connected") {
-            setIsGoogleConnected(true);
+        if (searchParams.get("gmail") === "connected") {
+            refetch();
+
             toast.success("Google account connected");
-            searchParams.delete("google");
-            setSearchParams(searchParams, { replace: true });
+
+            searchParams.delete("gmail");
+            setSearchParams(searchParams, {
+                replace: true,
+            });
         }
-    }, [searchParams, setSearchParams]);
+    }, [searchParams, refetch, setSearchParams]);
 
     const handleConnectGoogle = () => {
-        window.location.href = `/api/auth/google?redirect=/onboarding`;
+        connect();
     };
 
     const handleSubmit = async (values: ProfileDetailsValues) => {
@@ -41,14 +47,14 @@ const OnboardingPage = () => {
         setIsLoading(true);
 
         try {
-            await submitProfileDetails(values);
+            const updatedUser = await updateProfile(values);
+            dispatch(setUser({...updatedUser, isVerrified: user?.isVerified})); // or whatever your auth slice's action is called
             toast.success("Profile saved");
             navigate("/dashboard");
-        } catch (err) {
+        } catch (err: any) {
             const message =
-                err instanceof Error
-                    ? err.message
-                    : "Something went wrong. Please try again.";
+                err?.response?.data?.message ??
+                (err instanceof Error ? err.message : "Something went wrong. Please try again.");
 
             setErrorMessage(message);
             toast.error(message);
@@ -74,11 +80,12 @@ const OnboardingPage = () => {
                     <ProfileDetails
                         fullName={user?.name ?? ""}
                         email={user?.email ?? ""}
-                        isGoogleConnected={isGoogleConnected}
+                        isGoogleConnected={gmailConnected}
                         onConnectGoogle={handleConnectGoogle}
                         onSubmit={handleSubmit}
-                        isLoading={isLoading}
+                        isLoading={isLoading || googleLoading}
                         errorMessage={errorMessage}
+                        defaultValues={user ?? undefined}
                     />
                 </div>
             </div>

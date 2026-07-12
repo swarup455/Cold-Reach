@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/authRoute.js";
 import companyRoutes from "./routes/companyRoutes.js";
+import googleRoutes from "./routes/googleRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 const app: Express = express();
@@ -28,6 +29,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/companies", companyRoutes);
+app.use("/api/v1/google", googleRoutes);
 
 app.use(errorHandler);
 

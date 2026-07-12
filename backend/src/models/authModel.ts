@@ -50,6 +50,8 @@ export interface IUser extends Document {
     password: string;
     isVerified: boolean;
     isProfileComplete: boolean;
+    gmailConnected: boolean;
+    gmailRefreshToken?: string;
 
     profilePhoto?: string;
     phoneNumber?: string;
@@ -163,6 +165,15 @@ const userSchema: Schema<IUser> = new Schema(
             type: String,
             required: [true, "Password is required"],
         },
+        gmailConnected: {
+            type: Boolean,
+            default: false,
+        },
+
+        gmailRefreshToken: {
+            type: String,
+            default: null,
+        },
         isVerified: { type: Boolean },
         isProfileComplete: { type: Boolean, default: false },
         profilePhoto: { type: String },
@@ -198,13 +209,11 @@ const userSchema: Schema<IUser> = new Schema(
     { timestamps: true }
 );
 
-userSchema.pre<IUser>(
-    "save",
-    async function () {
-        if (!this.isModified("password"))
-            this.password = await bcrypt.hash(this.password, 10);
-    }
-);
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+
+    this.password = await bcrypt.hash(this.password, 10);
+});
 
 userSchema.index(
     { createdAt: 1 },

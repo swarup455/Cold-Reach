@@ -1,24 +1,10 @@
 import { useFormContext } from "react-hook-form";
-import { FcGoogle} from "react-icons/fc"
+import { FcGoogle } from "react-icons/fc"
 import { CheckCircle2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import type { ProfileDetailsInput } from "./ProfileDetailsForm";
+import type { ProfileDetailsInput } from "../profileSchema";
+import type { GoogleConnectStepProps } from "../profileSchema";
 
-function FieldError({ message }: { message?: string }) {
-    if (!message) return null;
-
-    return (
-        <p className="text-xs text-red-600 dark:text-red-400">
-            {message}
-        </p>
-    );
-}
-
-interface GoogleConnectStepProps {
-    isGoogleConnected: boolean;
-    onConnectGoogle: () => void | Promise<void>;
-}
 
 export function GoogleConnectStep({
     isGoogleConnected,
@@ -67,7 +53,11 @@ export function GoogleConnectStep({
                 )}
             </div>
 
-            <FieldError message={errors.googleConnected?.message} />
+            {errors.googleConnected?.message && (
+                <p className="text-xs text-red-600 dark:text-red-400">
+                    {errors.googleConnected?.message}
+                </p>
+            )}
         </section>
     );
 }
