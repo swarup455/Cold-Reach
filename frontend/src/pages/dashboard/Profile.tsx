@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useAppSelector } from "@/hooks/redux";
-import { ProfileCard } from "@/components/profile/profileCard";
+import { ProfileCard } from "@/components/profile/ProfileDetailCard";
 
 const ProfilePage = () => {
     const {
