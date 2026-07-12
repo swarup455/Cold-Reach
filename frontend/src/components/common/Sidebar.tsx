@@ -115,7 +115,12 @@ ${isActive(href)
 
             <div className="border-t border-slate-200 dark:border-slate-800 p-4">
                 <button
-                    onClick={() => navigate("/dashboard/profile")}
+                    onClick={
+                        () => {
+                            navigate("/dashboard/profile");
+                            setOpen(false);
+                        }
+                    }
                     className="mb-3 flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-2 py-2 transition hover:border-blue-200 hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-slate-800"
                 >
                     <Avatar className="h-11 w-11">
